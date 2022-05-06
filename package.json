@@ -1,12 +1,28 @@
 {
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "mongodb": "^4.5.0"
+  },
   "name": "server-side",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
+  "devDependencies": {},
   "scripts": {
+    "start": "node index.js",
+    "start-dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProgrammingHeroWC4/warehouse-management-server-side-kridi32.git"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ProgrammingHeroWC4/warehouse-management-server-side-kridi32/issues"
+  },
+  "homepage": "https://github.com/ProgrammingHeroWC4/warehouse-management-server-side-kridi32#readme",
+  "description": ""
 }
