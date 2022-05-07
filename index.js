@@ -6,7 +6,7 @@ const cors = require("cors");
 app.use(express.json());
 app.use(cors());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
   "mongodb+srv://admin:amiadmin@cluster0.uv0dp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const client = new MongoClient(uri, {
@@ -18,13 +18,40 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-
-    app.get('/', (req,res)=> {
-        res.send("hellow mellow yellow")
-    })
-    app.post("/items/add", async(req,res) => {
-        const item = req.body; console.log(item);
-        res.send({result:"success"})
+    const itemsCollection = client.db("summit-gear").collection("items");
+    app.get("/", (req, res) => {
+      res.send("hellow mellow yellow");
+      console.log("connected with mongo");
+    });
+    app.post("/items/add", async (req, res) => {
+      const item = req.body;
+      const result = await itemsCollection.insertOne(item);
+      res.send(result);
+    });
+    app.get("/items/all", async (req, res) => {
+      const query = {};
+      const result = await itemsCollection.find(query).toArray();
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/items/my", async (req, res) => {
+      const email = req.body.id;
+      const query = { user: email };
+      const result = await itemsCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/items/home", async (req, res) => {
+      const query = {};
+      const result = await itemsCollection.find(query).limit(6).toArray();
+      res.send(result);
+    });
+    app.post("/item", async(req, res) =>{
+      const id = req.body._id.itemId;
+      console.log(id);
+      const query = {_id: ObjectId(id)};
+      const result = await itemsCollection.findOne(query) ;
+      console.log(result);
+      res.send(result);
     })
   } finally {
     //await client.close();
