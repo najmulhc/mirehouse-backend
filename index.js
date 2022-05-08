@@ -1,23 +1,38 @@
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
+require('dotenv').config();
 
 app.use(express.json());
 app.use(cors());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
-  "mongodb+srv://admin:amiadmin@cluster0.uv0dp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+ `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uv0dp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-
+const verifyJWT = (req, res , next) =>{
+  const key = req.headers.key;
+  const token = key.split(" ")[1]; 
+  console.log(token);
+  jwt.verify(token, process.env.JWT_SECRET, (error, decoded) =>{
+    if(error){
+       console.log(error);
+    }
+    req.email =decoded.email;
+  })
+  next();
+}
 async function run() {
   try {
     await client.connect();
+
+    
     const itemsCollection = client.db("summit-gear").collection("items");
     app.get("/", (req, res) => {
       res.send("hellow mellow yellow");
@@ -33,11 +48,17 @@ async function run() {
       const result = await itemsCollection.find(query).toArray(); 
       res.send(result);
     });
-    app.post("/items/my", async (req, res) => {
+    app.post("/items/my", verifyJWT , async (req, res) => {
       const email = req.body.id;
-      const query = { user: email };
+       const test = req.email;
+      if(email === req.email){
+        const query = { user: email };
       const result = await itemsCollection.find(query).toArray();
       res.send(result);
+      }
+      else{
+        res.send([])
+      }
     });
     app.get("/items/home", async (req, res) => {
       const query = {};
@@ -67,7 +88,17 @@ async function run() {
       const query = {_id: ObjectId(id._id)}
       console.log(query);
       const result = await itemsCollection.deleteOne(query)
-      res.send(result)
+      res.send(result);
+    })
+
+    app.post("/login", async(req, res) =>{
+      const email = req.body.email;
+      console.log(email);
+      const accesToken = jwt.sign({email}, process.env.JWT_SECRET, {
+        expiresIn:"1d"
+      });
+      console.log(accesToken);
+      res.send({accesToken});
     })
   } finally {
     //await client.close();
