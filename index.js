@@ -30,11 +30,10 @@ async function run() {
     });
     app.get("/items/all", async (req, res) => {
       const query = {};
-      const result = await itemsCollection.find(query).toArray();
-      console.log(result);
+      const result = await itemsCollection.find(query).toArray(); 
       res.send(result);
     });
-    app.post("/items/my", async (req, res) => {
+    app.get("/items/my", async (req, res) => {
       const email = req.body.id;
       const query = { user: email };
       const result = await itemsCollection.find(query).toArray();
@@ -45,14 +44,24 @@ async function run() {
       const result = await itemsCollection.find(query).limit(6).toArray();
       res.send(result);
     });
-    app.post("/item", async(req, res) =>{
+    app.post("/item", async (req, res) => {
       const id = req.body._id.itemId;
-      console.log(id);
-      const query = {_id: ObjectId(id)};
-      const result = await itemsCollection.findOne(query) ;
-      console.log(result);
+      const query = { _id: ObjectId(id) };
+      const result = await itemsCollection.findOne(query); 
       res.send(result);
-    })
+    });
+    app.put("/item/update", async (req, res) => {
+      const { quantity, _id } = req.body;
+      const filter = {_id: ObjectId(_id)};
+      const updateDoc = {
+        $set: {
+          quantity:quantity
+        },
+      };
+      const result = await itemsCollection.updateOne(filter, updateDoc);
+      console.log(updateDoc);
+      res.send(result)
+    });
   } finally {
     //await client.close();
   }
