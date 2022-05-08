@@ -33,7 +33,7 @@ async function run() {
       const result = await itemsCollection.find(query).toArray(); 
       res.send(result);
     });
-    app.get("/items/my", async (req, res) => {
+    app.post("/items/my", async (req, res) => {
       const email = req.body.id;
       const query = { user: email };
       const result = await itemsCollection.find(query).toArray();
@@ -62,6 +62,13 @@ async function run() {
       console.log(updateDoc);
       res.send(result)
     });
+    app.delete('/item/delete', async(req, res) => {
+      const id = req.body;
+      const query = {_id: ObjectId(id._id)}
+      console.log(query);
+      const result = await itemsCollection.deleteOne(query)
+      res.send(result)
+    })
   } finally {
     //await client.close();
   }
